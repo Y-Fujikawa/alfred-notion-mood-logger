@@ -111,12 +111,12 @@ def main(args)
   case args_array
   in [String => title, String => mood, *] if !title.empty? && !mood.empty?
     # 正常なケース - そのまま処理を続行
+  in []
+    raise 'Title and Mood is required'
   in [String => title, *] if title.empty?
     raise 'Title is required'
   in [String, *]
     raise 'Mood is required'
-  in []
-    raise 'Both title and mood are required'
   else
     raise 'Invalid arguments'
   end
@@ -135,15 +135,15 @@ end
 # @param mood [String] 気持ちの内容
 # @return [Hash] APIレスポンス
 def send_notion(title, mood)
-  client = NotionApiClient.new(NOTION_TOKEN)
-  request_data = NotionPageRequest.create(DATABASE_ID, title, mood)
+  client = NotionApiClient.new(ENV.fetch('NOTION_TOKEN', nil))
+  request_data = NotionPageRequest.create(ENV.fetch('NOTION_DATABASE_ID', nil), title, mood)
   client.create_page(request_data)
 end
 
 # このメソッドはData classのNotionPageRequestに置き換えられました
 # 後方互換性のために残していますが、非推奨です
 def create_request_body(title, mood)
-  NotionPageRequest.create(DATABASE_ID, title, mood).to_h
+  NotionPageRequest.create(ENV.fetch('NOTION_DATABASE_ID', nil), title, mood).to_h
 end
 
 # このファイルが直接実行されるときだけmainを実行する。

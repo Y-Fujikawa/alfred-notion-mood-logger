@@ -90,7 +90,7 @@ class TestMain < Minitest::Test
     error = assert_raises(RuntimeError) do
       main('')
     end
-    assert_equal 'Title is required', error.message
+    assert_equal 'Title and Mood is required', error.message
   end
 
   def test_main_with_missing_mood
