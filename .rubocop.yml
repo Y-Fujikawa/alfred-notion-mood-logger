@@ -1,0 +1,20 @@
+AllCops:
+  NewCops: enable
+
+Metrics/MethodLength:
+  Max: 25
+  CountComments: false
+  Exclude:
+    - 'test/**/*'
+
+Metrics/ClassLength:
+  Max: 100
+  CountComments: false
+  Exclude:
+    - 'test/**/*'
+
+Metrics/AbcSize:
+  Exclude:
+    - 'test/**/*'
+
+plugins: rubocop-minitest
