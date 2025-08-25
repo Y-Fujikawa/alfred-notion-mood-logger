@@ -101,33 +101,52 @@ NOTION_TOKEN = ENV.fetch('NOTION_TOKEN', nil)
 DATABASE_ID = ENV.fetch('NOTION_DATABASE_ID', nil)
 
 # メイン処理: 引数を解析してNotionにページを作成する
+# @param args [String] 引数文字列
 def main(args)
+  args_array = parse_arguments(args)
+  title, mood = validate_arguments(args_array)
+  create_notion_page(title, mood)
+end
+
+# 引数文字列を解析してタイトルと気持ちを抽出する
+# @param args [String] 引数文字列
+# @return [Array<String>] [title, mood] の配列
+def parse_arguments(args)
   # 半角スペースと全角スペースの両方を区切り文字として分割
   # \s+ は1つ以上の空白文字（半角スペース、タブ、改行など）にマッチ
   # 　+ は1つ以上の全角スペースにマッチ
-  args_array = args.split(/[\s　]+/)
+  args.split(/[\s　]+/)
+end
 
+# 解析された引数を検証する
+# @param args_array [Array<String>] 解析された引数の配列
+# @return [Array<String>] [title, mood] の配列
+# @raise [RuntimeError] 引数が不正な場合
+def validate_arguments(args_array)
   # パターンマッチングで引数の検証を行う
   case args_array
   in [String => title, String => mood, *] if !title.empty? && !mood.empty?
-    # 正常なケース - そのまま処理を続行
+    [title, mood]
+  in []
+    raise 'Title and Mood is required'
   in [String => title, *] if title.empty?
     raise 'Title is required'
   in [String, *]
     raise 'Mood is required'
-  in []
-    raise 'Both title and mood are required'
   else
     raise 'Invalid arguments'
   end
+end
 
-  begin
-    response = send_notion(title, mood)
-    puts "Success! Page created with ID: #{response['id']}"
-  rescue StandardError => e
-    # Notion APIからのエラーメッセージを表示
-    puts "Failed to create page: #{e.message}"
-  end
+# Notionページを作成し、結果を出力する
+# @param title [String] ページタイトル
+# @param mood [String] 気持ちの内容
+def create_notion_page(title, mood)
+  response = send_notion(title, mood)
+  puts "Success! Page created with ID: #{response['id']}"
+rescue StandardError => e
+  # Notion APIからのエラーメッセージを表示
+  puts "Failed to create page: #{e.message}"
 end
 
 # Notion APIにページを作成する
@@ -135,15 +154,15 @@ end
 # @param mood [String] 気持ちの内容
 # @return [Hash] APIレスポンス
 def send_notion(title, mood)
-  client = NotionApiClient.new(NOTION_TOKEN)
-  request_data = NotionPageRequest.create(DATABASE_ID, title, mood)
+  client = NotionApiClient.new(ENV.fetch('NOTION_TOKEN', nil))
+  request_data = NotionPageRequest.create(ENV.fetch('NOTION_DATABASE_ID', nil), title, mood)
   client.create_page(request_data)
 end
 
 # このメソッドはData classのNotionPageRequestに置き換えられました
 # 後方互換性のために残していますが、非推奨です
 def create_request_body(title, mood)
-  NotionPageRequest.create(DATABASE_ID, title, mood).to_h
+  NotionPageRequest.create(ENV.fetch('NOTION_DATABASE_ID', nil), title, mood).to_h
 end
 
 # このファイルが直接実行されるときだけmainを実行する。
