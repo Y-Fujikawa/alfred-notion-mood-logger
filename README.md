@@ -12,7 +12,7 @@ Notionデータベースに気持ちやタスクを記録するためのRubyス�
 ## ファイル構成
 
 ### `main.rb` (モダン版)
-- Ruby 3.3.5以上（Ruby 3.0+の機能を使用）
+- Ruby 3.4.5以上（Ruby 3.0+の機能を使用）
 - パターンマッチング、Data class等の新機能を活用
 
 ### `main_legacy.rb` (レガシー版)
@@ -22,7 +22,7 @@ Notionデータベースに気持ちやタスクを記録するためのRubyス�
 ## 必要要件
 
 ### モダン版 (main.rb)
-- Ruby 3.3.5以上（Ruby 3.0+の機能を使用）
+- Ruby 3.4.5以上（Ruby 3.0+の機能を使用）
 - 以下のgemが必要です：
   - net/http（標準ライブラリ）
   - uri（標準ライブラリ）
@@ -78,7 +78,7 @@ export NOTION_DATABASE_ID="your_database_id"
 
 ### 1. 単体での実行
 
-#### モダン版 (Ruby 3.3.5+)
+#### モダン版 (Ruby 3.4.5+)
 ```bash
 ruby main.rb "タスクのタイトル" "気持ち"
 ```
