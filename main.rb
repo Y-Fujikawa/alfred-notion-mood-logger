@@ -125,7 +125,8 @@ end
 def validate_arguments(args_array)
   # パターンマッチングで引数の検証を行う
   case args_array
-  in [String => title, String => mood, *] if !title.empty? && !mood.empty?
+  in [String => title, *rest] if !title.empty? && !rest.empty? && rest.all? { |part| !part.empty? }
+    mood = rest.join
     [title, mood]
   in []
     raise 'Title and Mood is required'
