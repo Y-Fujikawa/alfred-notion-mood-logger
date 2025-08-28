@@ -66,27 +66,51 @@ class LegacyNotionApiClient
   end
 end
 
-# メイン処理: 引数を解析してNotionにページを作成する
-def main(args)
+# 引数文字列を解析してタイトルと気持ちを抽出する（Ruby 2.6対応）
+# @param args [String] 引数文字列
+# @return [Array<String>] 解析された引数の配列
+def parse_arguments_legacy(args)
   # 半角スペースと全角スペースの両方を区切り文字として分割
   # \\s+ は1つ以上の空白文字（半角スペース、タブ、改行など）にマッチ
   # 　+ は1つ以上の全角スペースにマッチ
-  args_array = args.split(/[\s　]+/)
-  title = args_array[0]
-  mood = args_array[1]
+  args.split(/[\s　]+/)
+end
 
+# 解析された引数を検証する（Ruby 2.6対応）
+# @param args_array [Array<String>] 解析された引数の配列
+# @return [Array<String>] [title, mood] の配列
+# @raise [RuntimeError] 引数が不正な場合
+def validate_arguments_legacy(args_array)
   # Ruby 2.6対応の引数検証（パターンマッチング不使用）
+  raise 'Title and Mood is required' if args_array.empty?
+
+  title = args_array[0]
   raise 'Title is required' if title.nil? || title.empty?
 
-  raise 'Mood is required' if mood.nil? || mood.empty?
+  # 2番目以降の引数を全てmoodとして結合
+  mood_parts = args_array[1..]
+  raise 'Mood is required' if mood_parts.nil? || mood_parts.empty? || mood_parts.any?(&:empty?)
 
-  begin
-    response = send_notion(title, mood)
-    puts "Success! Page created with ID: #{response['id']}"
-  rescue StandardError => e
-    # Notion APIからのエラーメッセージを表示
-    puts "Failed to create page: #{e.message}"
-  end
+  mood = mood_parts.join
+  [title, mood]
+end
+
+# Notionページを作成し、結果を出力する（Ruby 2.6対応）
+# @param title [String] ページタイトル
+# @param mood [String] 気持ちの内容
+def create_notion_page_legacy(title, mood)
+  response = send_notion(title, mood)
+  puts "Success! Page created with ID: #{response['id']}"
+rescue StandardError => e
+  # Notion APIからのエラーメッセージを表示
+  puts "Failed to create page: #{e.message}"
+end
+
+# メイン処理: 引数を解析してNotionにページを作成する
+def main(args)
+  args_array = parse_arguments_legacy(args)
+  title, mood = validate_arguments_legacy(args_array)
+  create_notion_page_legacy(title, mood)
 end
 
 # Notion APIにページを作成する（Ruby 2.6対応）
