@@ -172,4 +172,78 @@ class TestMain < Minitest::Test
 
     assert_match(/Failed to create page: HTTP Error 401: Unauthorized/, output[0])
   end
+
+  # 新しい複数単語の気持ち機能のテスト
+  def test_parse_arguments_with_multiple_words
+    result = parse_arguments('今日のタスク とても 疲れた 一日 だった')
+    expected = %w[今日のタスク とても 疲れた 一日 だった]
+
+    assert_equal expected, result
+  end
+
+  def test_validate_arguments_with_multiple_mood_words
+    args_array = %w[今日のタスク とても 疲れた 一日 だった]
+    result = validate_arguments(args_array)
+
+    assert_equal %w[今日のタスク とても疲れた一日だった], result
+  end
+
+  def test_validate_arguments_with_multiple_mood_words_with_punctuation_mark
+    args_array = %w[今日のタスク とても疲れた一日だった。 明日はペースを落としてやるぞ。]
+    result = validate_arguments(args_array)
+
+    assert_equal %w[今日のタスク とても疲れた一日だった。明日はペースを落としてやるぞ。], result
+  end
+
+  def test_main_with_multiple_mood_words
+    # Notion APIのモック
+    stub_request(:post, 'https://api.notion.com/v1/pages')
+      .to_return(
+        status: 200,
+        body: JSON.generate({ 'id' => 'test_page_id' }),
+        headers: { 'Content-Type' => 'application/json' }
+      )
+
+    # 複数単語の気持ちでのテスト
+    output = capture_io do
+      main('プロジェクト完了 とても 疲れた けど やりがい があった')
+    end
+
+    assert_match(/Success! Page created with ID: test_page_id/, output[0])
+  end
+
+  def test_main_with_mixed_spaces_and_multiple_words
+    # Notion APIのモック
+    stub_request(:post, 'https://api.notion.com/v1/pages')
+      .to_return(
+        status: 200,
+        body: JSON.generate({ 'id' => 'test_page_id' }),
+        headers: { 'Content-Type' => 'application/json' }
+      )
+
+    # 全角・半角スペース混在での複数単語テスト
+    output = capture_io do
+      main('会議　終了 とても　長くて 疲れた　会議 だった')
+    end
+
+    assert_match(/Success! Page created with ID: test_page_id/, output[0])
+  end
+
+  def test_validate_arguments_with_empty_mood_parts
+    # 空の部分がある場合はエラーになることを確認
+    args_array = ['タイトル', '', '気持ち']
+
+    error = assert_raises(RuntimeError) do
+      validate_arguments(args_array)
+    end
+    assert_equal 'Mood is required', error.message
+  end
+
+  def test_backwards_compatibility_two_arguments
+    # 既存の2引数での動作が変わらないことを確認
+    args_array = %w[タスク完了 満足]
+    result = validate_arguments(args_array)
+
+    assert_equal %w[タスク完了 満足], result
+  end
 end
