@@ -138,7 +138,7 @@ bundle exec rubocop --auto-correct
 
 テストの実行：
 ```bash
-ruby test/test_main.rb
+bundle exec rake test
 ```
 
 ### レガシー版のテスト
