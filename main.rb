@@ -123,20 +123,13 @@ end
 # @return [Array<String>] [title, mood] の配列
 # @raise [RuntimeError] 引数が不正な場合
 def validate_arguments(args_array)
-  # パターンマッチングで引数の検証を行う
-  case args_array
-  in [String => title, *rest] if !title.empty? && !rest.empty? && rest.all? { |part| !part.empty? }
-    mood = rest.join
-    [title, mood]
-  in []
-    raise 'Title and Mood is required'
-  in [String => title, *] if title.empty?
-    raise 'Title is required'
-  in [String, *]
-    raise 'Mood is required'
-  else
-    raise 'Invalid arguments'
-  end
+  raise 'Title and Mood is required' if args_array.empty?
+
+  title, *mood_parts = args_array
+  raise 'Title is required' if title.empty?
+  raise 'Mood is required' if mood_parts.empty? || mood_parts.any?(&:empty?)
+
+  [title, mood_parts.join]
 end
 
 # Notionページを作成し、結果を出力する

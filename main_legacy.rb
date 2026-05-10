@@ -81,18 +81,13 @@ end
 # @return [Array<String>] [title, mood] の配列
 # @raise [RuntimeError] 引数が不正な場合
 def validate_arguments_legacy(args_array)
-  # Ruby 2.6対応の引数検証（パターンマッチング不使用）
   raise 'Title and Mood is required' if args_array.empty?
 
-  title = args_array[0]
-  raise 'Title is required' if title.nil? || title.empty?
+  title, *mood_parts = args_array
+  raise 'Title is required' if title.empty?
+  raise 'Mood is required' if mood_parts.empty? || mood_parts.any?(&:empty?)
 
-  # 2番目以降の引数を全てmoodとして結合
-  mood_parts = args_array[1..]
-  raise 'Mood is required' if mood_parts.nil? || mood_parts.empty? || mood_parts.any?(&:empty?)
-
-  mood = mood_parts.join
-  [title, mood]
+  [title, mood_parts.join]
 end
 
 # Notionページを作成し、結果を出力する（Ruby 2.6対応）
